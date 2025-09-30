@@ -14,3 +14,5 @@ So sánh ba mô hình triển khai:
 
 Xây dựng prototype và đo đạc thực tế: gas fee, độ trễ, băng thông, lưu trữ.
 
+Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến nghị cho áp dụng PQ signatures trong hệ thống blockchain.
+
