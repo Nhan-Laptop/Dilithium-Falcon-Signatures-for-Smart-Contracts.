@@ -19,6 +19,38 @@ Xây dựng prototype và đo đạc thực tế: gas fee, độ trễ, băng th
 Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến nghị cho áp dụng PQ signatures trong hệ thống blockchain.
 ## Senario.
 
+- Trong hệ sinh thái blockchain, chữ ký số đóng vai trò quan trọng, được sử dụng để xác thực giao dịch và bảo vệ tài sản kỹ thuật số.
+- Chữ ký số được ứng dụng ở:
+    1. User → Transaction (account-level)
+    2. Contract → Transaction (contract-level)
+    3. Block/consensus signatures (validator-level, PoS)
+    4. L2 / Rollups (sequencer-level)
+    5. Bridges / Oracles / Off-chain committees
+- Hiện nay, các mô hình blockchain phổ biến sử dụng các loại chữ ký như EDCSA, Schnorr, BLS,... để xác thực giao dịch và bảo mật mạng lưới.
+
+![image](./sign_diagram.svg)
+
+
+### Tài sản được bảo vệ
+- Ở đây, các loại chữ ký số kể trên để bảo vệ tài sản là tiền mã hóa (cryptocurrency) và hợp đồng thông minh (smart contract).
+- Tài sản được bảo vệ thông qua các đảm bảo sau:
+  - Tính sở hữu: Chữ ký số chứng minh quyền sở hữu tài sản kỹ thuật số, chỉ chủ sở hữu mới có thể thực hiện giao dịch.
+  - Tính toàn vẹn: Chữ ký số đảm bảo rằng dữ liệu giao dịch không bị thay đổi hoặc giả mạo.
+  - Tính minh bạch: Nội dung của giao dịch/hợp đồng một khi đã được xác thực sẽ được công khai và lưu trữ dài hạn, không thể xóa hoặc sửa đổi.
+### Mối đe dọa
+- Các thuật toán chữ ký số được sử dụng hiện nay dựa trên các giả định về độ khó của các bài toán toán học như:
+  - ECDSA: Dựa trên độ khó của bài toán logarit rời rạc trên đường cong elliptic.
+  - Schnorr: Cũng dựa trên độ khó của bài toán logarit rời rạc, nhưng với một số cải tiến về hiệu suất và bảo mật.
+  - BLS: Dựa trên độ khó của bài toán logarit rời rạc trong các nhóm có cấu trúc đặc biệt.
+
+- Tuy nhiên, với sự phát triển của máy tính lượng tử, các thuật toán này có thể bị phá vỡ trong tương lai gần.
+- Các mối đe dọa chính bao gồm:
+  - Tấn công Shor: Máy tính lượng tử có thể giải quyết bài toán logarit rời rạc một cách hiệu quả, làm suy yếu bảo mật của ECDSA và Schnorr.
+  - Tấn công Grover: Máy tính lượng tử có thể tăng tốc độ tìm kiếm, làm giảm độ an toàn của các thuật toán dựa trên khóa đối xứng.
+
+### Giải pháp tiềm năng 
+- Để đối phó với các mối đe dọa từ máy tính lượng tử, ta xem xét và triển khai một số loại chữ ký số mới, có sức chống chịu cao với các cuộc tấn công bằng máy tính lượng tử. 
+- Trong đó, các loại chữ ký số dựa trên Lattice (Lattice-based signatures) được xem là một trong những ứng cử viên triển vọng nhất, có thể kể đến như: Dilithium (đã được chuẩn hóa bởi NIST trong FIPS 204), Falcon (đang trong quá trình chuẩn hóa bởi NIST).
 
 ## Stakeholders.
 1. Nhà phát triển blockchain/ smart contract: cần giải pháp triển khai hiệu quả, an toàn.
