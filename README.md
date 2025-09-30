@@ -49,4 +49,5 @@ Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến ng
 1. Chi phí (gas, bytes lưu trữ, latency) để xác thực Dilithium/Falcon on-chain so với ECDSA là bao nhiêu trên EVM/Solidity và trên nền tảng WASM (Substrate/CosmWasm)?
 2. Có những thiết kế hybrid/auxiliary (off-chain verification + on-chain attestation, hoặc zk-proof of verification) nào giúp giảm chi phí on-chain mà vẫn giữ được tính bảo mật/ khả năng audit không?
 3. Có sự khác biệt thực tiễn trong việc triển khai Dilithium với Falcon (cân nhắc: kích thước chữ ký, công đoạn sampling/FFT, constant-time difficulty) ảnh hưởng tới lựa chọn cho blockchain hay không?
-* Giả thuyết: Triển khai verify trực tiếp trên EVM sẽ tốn gas và có thể không thực tế; WASM-based smart contract hoặc off-chain + attestation/zk-proof là các hướng thực nghiệm khả thi hơn. Falcon có chữ ký nhỏ hơn thi an toàn hơn nhưng chữ ký có thể lớn hơn. 
+
+Giả thuyết: Triển khai verify trực tiếp trên EVM sẽ tốn gas và có thể không thực tế; WASM-based smart contract hoặc off-chain + attestation/zk-proof là các hướng thực nghiệm khả thi hơn. Falcon có chữ ký nhỏ hơn thi an toàn hơn nhưng chữ ký có thể lớn hơn. 
