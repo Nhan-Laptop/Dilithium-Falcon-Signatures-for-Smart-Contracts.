@@ -12,6 +12,6 @@ So sánh ba mô hình triển khai:
   - Off-chain verification + on-chain attestation (giảm gas bằng cách chỉ lưu bằng chứng trên chain).
   - Zk-proof assisted verification (dùng SNARK/Plonk để xác minh hiệu quả hơn).
 
-Xây dựng prototype và đo đạc thực tế: gas fee, độ trễ, băng thông, lưu trữ.
+Xây dựng prototype và đo đạc thực tế: gas fee, độ trễ, băng thông, lưu trữ.//
 Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến nghị cho áp dụng PQ signatures trong hệ thống blockchain.
 
