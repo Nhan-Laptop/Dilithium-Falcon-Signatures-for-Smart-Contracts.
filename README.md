@@ -19,10 +19,7 @@ Xây dựng prototype và đo đạc thực tế: gas fee, độ trễ, băng th
 Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến nghị cho áp dụng PQ signatures trong hệ thống blockchain.
 ## Senario.
 
-## Assets to Protect. 
-1. Tính toàn vẹn và xác thực giao dịch trên blockchain.
-2. Chi phí vận hành hợp đồng thông minh (gas, storage).
-3. Khóa riêng tư (private key) của người dùng.
+
 ## Stakeholders.
 1. Nhà phát triển blockchain/ smart contract: cần giải pháp triển khai hiệu quả, an toàn.
 2. Người dùng blockchain: mong muốn giao dịch chi phí thấp, độ trễ nhỏ.
@@ -51,3 +48,56 @@ Viết báo cáo khoa học, cung cấp mã nguồn reproducible và khuyến ng
 3. Có sự khác biệt thực tiễn trong việc triển khai Dilithium với Falcon (cân nhắc: kích thước chữ ký, công đoạn sampling/FFT, constant-time difficulty) ảnh hưởng tới lựa chọn cho blockchain hay không?
 
 Giả thuyết: Triển khai verify trực tiếp trên EVM sẽ tốn gas và có thể không thực tế; WASM-based smart contract hoặc off-chain + attestation/zk-proof là các hướng thực nghiệm khả thi hơn. Falcon có chữ ký nhỏ hơn thi an toàn hơn nhưng chữ ký có thể lớn hơn. 
+## Methodology. 
+1. Thiết kế kịch bản triển khai
+  - On-chain verification (EVM/Solidity): port trực tiếp thuật toán verify.
+  - On-chain verification (WASM/Polkadot): compile Rust → WASM, chạy trên Substrate.
+  - Off-chain verification + on-chain attestation: chỉ đưa Merkle root/hash lên chain.
+  - zk-proof assisted verification: tạo zk-SNARK proof ngoài chuỗi, verify proof nhỏ trên chain.
+2. Implementation plan.
+  - Libraries: PQClean, liboqs, pqcrypto (Rust).
+  - Blockchain platforms: Hardhat/Ganache (EVM), Substrate dev node, CosmWasm.
+  - zk tools: Circom/snakjs, Halo2.
+  - Bechmark: đo gas, calldata size, storage, latency, proof gen time.
+## Assets & Security Requirements. 
+1. Assets cần bảo vệ.
+  - Khóa riêng tư người dùng.
+  - Tính toàn vẹn giao dịch blockchain.
+  - Chi phí gas & storage (tài nguyên on-chain).
+2. Yêu cầu bảo mật khi triển khai.
+  - Constant-time implementation (không branch theo secret).
+  - Randomness chuẩn CSPRNG.
+  - Side-channel hardened (đặc biệt là Falcon).
+  - Input validation: kiểm tra signature/public key length.
+  - Replay protection cho attestation (nonce/timestamp/chain-id).
+3. Checklist an toàn.
+  - Dilithium: rejection sampling, SHAKE-128/256 chuẩn.
+  - Falcon: integer-based sampler, tránh floating point không constant-time.
+  - Blockchain: hash thay vì lưu trực tiếp chữ ký.
+## Experiment Setup.
+1. Key generation: tạo keypairs Dilithium & Falcon theo chuẩn Nist.
+2. Test vectors: verify với bộ chuẩn NIST PQC.
+3. Blockchain testnest: Ethereum local, Substrate dev chain.
+4. Benchmark metrics:
+   - Gas per verify.
+   - Transaction size (bytes).
+   - Storage overhead.
+   - Proof generation time (zk).
+## Deliverables.
+1. Báo cáo chi tiết + so sánh Dilithium vs Falcon.
+2. Prototype contracts (EVM, WASM).
+3. Off-chain attestation server.
+4. zk-proof circuit (demo).
+5. Bộ dữ liệu benchmark (CSV, plots).
+6. Demo video + repoducible repo (Docker).
+## Riks & Mitigation.
+1. Falcon side-channel → chỉ dùng implementation đã hardened.
+2. Gas EVM quá cao → fallback sang attestation/zk.
+3. zk circuit quá phức tạp → thử nghiệm sub-circuit hoặc batching.
+4. Thay đổi chuẩn NIST → ghi rõ commit hash, version.
+
+## References.
+1. [NIST FIPS 204 — ML-DSA (Dilithium).](https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.204.pdf)
+2. [Cloudflare (2024) — A look at the latest post-quantum signature standardization candidates](https://blog.cloudflare.com/another-look-at-pq-signatures/)
+3. [Benchmarking and Analysing NIST PQC Lattice-Based Signature Scheme Standards on the ARM Cortex M7](https://csrc.nist.gov/csrc/media/Events/2022/fourth-pqc-standardization-conference/documents/papers/benchmarking-and-analysiing-nist-pqc-lattice-based-pqc2022.pdf)
+4. [CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation](https://pq-crystals.org/dilithium/data/dilithium-specification-round3.pdf)
