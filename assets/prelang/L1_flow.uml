@@ -1,0 +1,35 @@
+@startuml
+title Ethereum / L1 Transaction Flow Activity Diagram
+
+|User / Wallet|
+start
+:Create Transaction (Recipient Address, Amount, Gas Fee);
+:Sign Transaction with Private Key;
+
+|Ethereum Network (Mempool)|
+:Broadcast Signed Transaction to Network;
+:Transaction enters the Mempool and waits for selection;
+note right: Higher Gas fees increase priority
+
+|Validator|
+:Validator is selected to propose a new block;
+:Selects a set of transactions from the Mempool;
+:Executes transaction logic via the EVM (e.g., update balances, run smart contract);
+:Bundles executed transactions into a new Block;
+:Proposes the new Block to the rest of the network;
+:Other validators attest to the Block's validity;
+
+if (Block receives enough attestations?) then (yes)
+    |Blockchain|
+    :Add Block to the Chain;
+    :Block achieves Finality, becoming immutable;
+    :Update the global state (Account balances are now officially changed);
+else (no)
+    |Validator|
+    :Block is Discarded;
+    note left: Transactions are returned to the Mempool
+endif
+
+stop
+
+@enduml

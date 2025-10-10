@@ -1,0 +1,74 @@
+@startuml
+title Merged: Ethereum Transaction Flow + L2 Dilithium Verification
+
+|User / Wallet|
+start
+:Create Transaction (Recipient Address, Amount, Gas Fee);
+:Sign Transaction with Private Key;
+
+|Ethereum Network (Mempool)|
+:Broadcast Signed Transaction to Network;
+:Transaction enters the Mempool and waits for selection;
+note right: Higher Gas fees increase priority
+
+|Validator|
+:Validator is selected to propose a new block;
+:Selects a set of transactions from the Mempool;
+:Executes transaction logic via the EVM (e.g., update balances, run smart contract);
+:Bundles executed transactions into a new Block;
+:Proposes the new Block to the rest of the network;
+:Other validators attest to the Block's validity;
+
+if (Block receives enough attestations?) then (yes)
+    |Blockchain|
+    :Add Block to the Chain;
+    :Block achieves Finality, becoming immutable;
+    :Update the global state (Account balances are now officially changed);
+else (no)
+    |Validator|
+    :Block is Discarded;
+    note left: Transactions are returned to the Mempool
+endif
+
+partition "Off-chain User Actions / Key Setup" {
+    |User / Wallet (Off-Chain)|
+    :Generate Dilithium key pair (private & public key);
+    :Submit a transaction (L1 or L2) to register Dilithium Public Key (one-time setup);
+}
+
+partition "Performing a Protected Action" {
+    |User / Wallet (Off-Chain)|
+    :Create a message payload (e.g., function call data for `withdraw(amount, to)`);
+    :Sign the message hash with Dilithium Private Key;
+    note right: This creates the quantum-resistant signature.
+    :Call the Smart Contract's protected function, providing the message and signature as arguments;
+}
+
+|Sequencer / Mempool (optional L2/Rollup)|
+:Transaction enters sequencer/mempool (if using a rollup);
+
+|Smart Contract (On-Chain)|
+:Protected function is executed;
+:Retrieve user's stored Dilithium Public Key from registry (on-chain storage);
+:Call internal Dilithium.verify() function with (PublicKey, message, signature);
+
+if (Signature is valid?) then (yes)
+    :Execute the protected logic (e.g., transfer assets, update state);
+    :Emit Success Event;
+    note right: Optionally include an on-chain attestation or merkle-root of off-chain verification
+else (no)
+    :Transaction Reverts;
+    :Emit Failure Event;
+endif
+
+note bottom
+    Hybrid flows and deployment options:
+     - On-chain verification: direct verify in an on-chain contract (L1 or L2). This can be gas-intensive on EVM L1.
+     - Off-chain verification + on-chain attestation: verify signatures off-chain and submit a compact attestation to the chain to save gas.
+     - zk-proof assisted verification: generate a succinct proof off-chain and verify the proof on-chain (low verifier cost).
+     - Rollups: use a sequencer/mempool and perform verification either in the rollup runtime or via attestations submitted to L1.
+end note
+
+stop
+
+@enduml

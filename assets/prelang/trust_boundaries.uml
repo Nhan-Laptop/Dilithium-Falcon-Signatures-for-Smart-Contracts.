@@ -1,0 +1,78 @@
+@startuml
+title Trust Boundaries for PQ Signature Verification
+
+' Actors and zones
+skinparam rectangle {
+  Shadowing false
+}
+
+rectangle "User Device (Client-side)" as User {
+  actor Wallet
+}
+
+rectangle "Off-chain Infrastructure" as Offchain {
+  component "Signer/Prover" as Prover
+  component "Attestor / Watcher" as Attestor
+  component "ZK Prover" as ZKProver
+}
+
+rectangle "On-chain (L1) / Contract" as Onchain {
+  database "Public Key Registry" as PKReg
+  component "Smart Contract\n(verify / attestation)" as Contract
+}
+
+rectangle "Rollup / Sequencer (optional)" as Rollup {
+  component "Sequencer / Rollup" as Sequencer
+}
+
+' Trust boundary boxes
+note left of User
+  TRUST BOUNDARY: User's private key
+  - Device compromise allows key extraction
+end note
+
+note top of Offchain
+  TRUST BOUNDARY: Off-chain verifiers
+  - Attestors must be trusted or economically slashed
+end note
+
+note right of Onchain
+  TRUST BOUNDARY: Smart contract runtime
+  - Correctness, gas limits, and storage
+end note
+
+' Flows with annotations
+Wallet -down-> Prover : "Sign message with PQ private key"
+Prover -down-> Attestor : "Verify signature (off-chain)"
+Attestor -down-> Contract : "Submit attestation (hash/merkle/root)"
+Contract -right-> PKReg : "Read public key (on-chain)"
+Wallet -right-> Contract : "Call protected function (message + signature)"
+Contract -left-> ZKProver : "Verify zk-proof (optional)"
+Sequencer -down-> Contract : "Include rollup batch/attestation (optional)"
+
+' Boundary crossing labels
+note on link
+  Ownership proof required at registration:
+  - Sign a nonce using chain account key
+  - Validate key format/length
+end note
+
+note left: Attestation risks:
+  - Malicious attestor can post false attestations
+  - Use quorum/bonding/challenge windows
+end note
+
+note right: On-chain verification risks:
+  - Gas DoS, implementation bugs, side-channels
+  - Prefer WASM/native precompiles where possible
+end note
+
+legend
+  || Flows || Meaning
+  |--> | Signed message or data flow
+  |==> | Attestation or proof
+endlegend
+
+stop
+
+@enduml

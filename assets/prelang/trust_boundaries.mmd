@@ -1,0 +1,44 @@
+%% Trust Boundaries for PQ Signature Verification (Mermaid)
+flowchart TB
+  subgraph UserDevice [User Device (Client-side)]
+    UWallet[Wallet]
+  end
+
+  subgraph Offchain [Off-chain Infrastructure]
+    Prover[Signer / Prover]
+    Attestor[Attestor / Watcher]
+    ZKProver[ZK Prover]
+  end
+
+  subgraph Onchain [On-chain (L1) / Contract]
+    PKReg[(Public Key Registry)]
+    Contract[Smart Contract\n(verify / attestation)]
+  end
+
+  subgraph Rollup [Rollup / Sequencer (optional)]
+    Sequencer[Sequencer / Rollup]
+  end
+
+  UWallet -->|Sign message with PQ private key| Prover
+  Prover -->|Verify signature (off-chain)| Attestor
+  Attestor -->|Submit attestation (hash/merkle/root)| Contract
+  UWallet -->|Call protected function (message + signature)| Contract
+  Contract -->|Read public key (on-chain)| PKReg
+  Contract -->|Verify zk-proof (optional)| ZKProver
+  Sequencer -->|Include rollup batch/attestation (optional)| Contract
+
+  classDef note fill:#fff7c0,stroke:#ffcc00
+  class Prover,Attestor,ZKProver,Contract,PKReg,Sequencer note
+
+  click PKReg href "#" "Public Key Registry: validate length & format; require ownership proof"
+
+  %% Legend / notes below
+  subgraph Notes
+    N1[Ownership proof required at registration: sign nonce with chain account key; validate key format/length]
+    N2[Attestation risks: malicious attestor -> use quorum/bonding/challenge windows]
+    N3[On-chain verification risks: gas DoS, implementation bugs, side-channels; prefer WASM/native precompiles]
+  end
+
+  N1---PKReg
+  N2---Attestor
+  N3---Contract
